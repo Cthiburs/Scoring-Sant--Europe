@@ -22,8 +22,8 @@ sante_eu <- read_csv2("BDD_SANTE.csv")
 sante_eu %>% group_by(COUNTRY) %>% count(REFYEAR) %>% mutate(prop = round(n/sum(n),2)) %>% 
   select(-n) %>% spread(key="REFYEAR",value=prop)   # Supprimer les pays AT, HR, DE, cause ENQUÊTE EFFECTUÉE en 2013 ou 2015. Supprimer ou considérer pour la FR, CZ et SE les individus de 2015.
 
-sante_eu %>% group_by(COUNTRY) %>% count(JOBISCO) %>% mutate(prop = round(n/sum(n),2)) %>% 
-  select(-n) %>% spread(key="JOBISCO",value=prop) # Fusionner MAINSTAT et JOBISCO d'une part puis MAINSTAT et JOBSTAT d'autres pour tester leur corrélation avec etat de santé
+sante_eu %>% group_by(COUNTRY) %>% count(JOBSTAT) %>% mutate(prop = round(n/sum(n),2)) %>% 
+  select(-n) %>% spread(key="JOBSTAT",value=prop) # Fusionner MAINSTAT et JOBSTAT d'une part puis MAINSTAT et JOBSTAT d'autres pour tester leur corrélation avec etat de santé
 
 sante_eu %>% group_by(COUNTRY) %>% count(FT_PT) %>% mutate(prop = round(n/sum(n),2)) %>% 
   select(-n) %>% spread(key="FT_PT",value=prop) # Supprimé car dépendant intrinsèquement de MAINSTAT  
@@ -108,7 +108,7 @@ freq(sante_FR$DEG_URB_r)
 chisq.test(table(sante_FR$DEG_URB_r,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$DEG_URB_r,sante_FR$etat_sante),las=3,shade=TRUE)
 
-# Etat matrimonial légal : MARSTALEGAL
+# MARSTALEGAL : Etat matrimonial légal 
 freq(sante_FR$MARSTALEGAL)  
 class(sante_FR$MARSTALEGAL)
 sante_FR$MARSTALEGAL <- as.character(sante_FR$MARSTALEGAL)
@@ -117,11 +117,96 @@ freq(sante_FR$MARSTALEGAL_r)
 chisq.test(table(sante_FR$MARSTALEGAL_r,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$MARSTALEGAL_r,sante_FR$etat_sante),las=3,shade=TRUE)
 
-# Niveau de diplôme le plus élevé achevé : HATLEVEL
+# HATLEVEL : Niveau de diplôme le plus élevé achevé
 freq(sante_FR$HATLEVEL)  
 class(sante_FR$HATLEVEL)
 sante_FR$HATLEVEL <- as.character(sante_FR$HATLEVEL)
 sante_FR$HATLEVEL <- fct_collapse(sante_FR$HATLEVEL, "Prim"=c("0","1"), "Secon"=c("2","3","4"),
                                "Univ"=c("5","6","7","8"))
-sante_FR$HATLEVEL_r <- as.character(fct_recode(sante_FR$HATLEVEL, "2"="-1"))  # Imputer par le mode
+sante_FR$HATLEVEL_r <- as.character(fct_recode(sante_FR$HATLEVEL, "Secon"="-1"))  # Imputer par le mode
 freq(sante_FR$HATLEVEL_r)
+chisq.test(table(sante_FR$HATLEVEL_r,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$HATLEVEL_r,sante_FR$etat_sante),las=3,shade=TRUE)
+
+# Statut travailleur Auto déclaré (MAINSTAT) X Statut dans l'emploi (JOBSTAT) X Profession dans l'emploi (JOBISCO)
+freq(sante_FR$MAINSTAT)
+freq(sante_FR$JOBISCO)
+freq(sante_FR$JOBSTAT)
+class(sante_FR$MAINSTAT)
+class(sante_FR$JOBISCO)
+class(sante_FR$JOBSTAT)
+sante_FR$MAINSTAT  <- as.character(sante_FR$MAINSTAT)
+sante_FR$JOBSTAT <- as.character(sante_FR$JOBSTAT)
+sante_FR$MAINSTAT2 <- sante_FR$MAINSTAT
+table(sante_FR$MAINSTAT,sante_FR$JOBSTAT)
+sante_FR$MAINSTAT2 <- ifelse(sante_FR$MAINSTAT2=="10",sante_FR$JOBSTAT[sante_FR$JOBSTAT!="-2"],sante_FR$MAINSTAT2[sante_FR$MAINSTAT2!="10"])
+freq(sante_FR$MAINSTAT2)
+sante_FR$MAINSTAT_r <- fct_recode(sante_FR$MAINSTAT2,"21"="-1")
+freq(sante_FR$MAINSTAT_r)
+chisq.test(table(sante_FR$MAINSTAT_r,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$MAINSTAT_r,sante_FR$etat_sante), las=3, shade = T)
+
+# HHNBPERS : Nombre de personnes vivant dans le ménage, y compris le répondant
+freq(sante_FR$HHNBPERS)
+chisq.test(table(sante_FR$HHNBPERS,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$HHNBPERS,sante_FR$etat_sante), las=3, shade = T)
+
+# HHNBPERS_65PLUS : Nombre de personnes âgées de 65 ans et plus
+freq(sante_FR$HHNBPERS_65PLUS)
+sante_FR$HHNBPERS_65PLUS <- as.character(sante_FR$HHNBPERS_65PLUS)
+class(sante_FR$HHNBPERS_65PLUS)
+sante_FR$HHNBPERS_65PLUS_r <- fct_collapse(sante_FR$HHNBPERS_65PLUS, "Oui"=c("-1","0"), "Non"=c("1","2","3"))
+freq(sante_FR$HHNBPERS_65PLUS_r)
+chisq.test(table(sante_FR$HHNBPERS_65PLUS_r,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$HHNBPERS_65PLUS_r,sante_FR$etat_sante), las=3, shade = T)
+chisq.test(table(sante_FR$HHNBPERS_65PLUS_r,sante_FR$HHNBPERS))
+mosaicplot(table(sante_FR$HHNBPERS_65PLUS_r,sante_FR$HHNBPERS), las=3, shade = T) # les deux variables sont liées
+
+# HHTYPE : Type de ménage
+freq(sante_FR$hhtype)
+chisq.test(table(sante_FR$hhtype,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$hhtype,sante_FR$etat_sante), las=3, shade = T)
+
+# HH_ACT : Nombre de personnes âgées de 16 à 64 dans le ménage qui sont employées
+freq(sante_FR$HH_ACT)
+class(sante_FR$HH_ACT)
+sante_FR$HH_ACT <- as.character(sante_FR$HH_ACT)
+sante_FR$HH_ACT <- fct_recode(sante_FR$HH_ACT,"0"="-1")
+chisq.test(table(sante_FR$HH_ACT,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$HH_ACT,sante_FR$etat_sante), las=3, shade = T)
+
+# HHINCOME : Revenu mensuel net du ménage
+freq(sante_FR$HHINCOME)  # imputation plus proche voisin ou multiple
+
+
+
+# AC1A : Accident de la route survenu au cours des 12 derniers mois
+freq(sante_FR$AC1A)
+sante_FR$AC1A <- as.character(sante_FR$AC1A)
+sante_FR$AC1A_r <- fct_recode(sante_FR$AC1A,"2"="-1")
+freq(sante_FR$AC1A_r)
+
+# AC1B : Accident à domicile au cours des 12 derniers mois
+freq(sante_FR$AC1B)
+sante_FR$AC1B <- as.character(sante_FR$AC1B)
+sante_FR$AC1B_r <- fct_recode(sante_FR$AC1B,"2"="-1")
+freq(sante_FR$AC1B_r)
+
+# AC1C : Accident de loisir au cours des 12 derniers mois
+freq(sante_FR$AC1C)
+sante_FR$AC1C <- as.character(sante_FR$AC1C)
+sante_FR$AC1C_r <- fct_recode(sante_FR$AC1C,"2"="-1")
+freq(sante_FR$AC1C_r)
+
+# HO1 : Admission en hospitalisation à l'hôpital au cours des 12 derniers mois
+
+
+
+# HO2 : Nombre de nuits passées en tant que patient dans un hôpital au cours des 12 derniers mois
+
+
+
+# HO3 : L'admission en tant que patient de jour dans un hôpital au cours des 12 derniers mois
+
+
+# HO4 : Nombre de fois admis en tant que patient de jour dans un hôpital au cours des 12 derniers mois
