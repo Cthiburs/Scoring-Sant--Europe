@@ -91,8 +91,8 @@ chisq.test(table(sante_FR$age,sante_FR$etat_sante))
 chisq.residuals(table(sante_FR$age,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$age,sante_FR$etat_sante),las=3,shade=TRUE) # confirme le choix de trois classes
 sante_FR$age_r <- fct_collapse(sante_FR$age, "15-39"=c("15-17","18-19","20-24","25-29","30-34","35-39"),
-                                            "40-64"=c("40-44","45-49","50-54","55-59","60-64"),
-                                            "65+"=c("65-69","70-74","75-79","80-84","85+"))
+                               "40-64"=c("40-44","45-49","50-54","55-59","60-64"),
+                               "65+"=c("65-69","70-74","75-79","80-84","85+"))
 chisq.test(table(sante_FR$age_r,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$age_r,sante_FR$etat_sante),las=3,shade=TRUE)                                  
 freq(sante_FR$age_r)
@@ -103,7 +103,7 @@ class(sante_FR$DEG_URB)
 sante_FR$DEG_URB <- as.character(sante_FR$DEG_URB)
 sante_FR$DEG_URB_r <- as.character(fct_recode(sante_FR$DEG_URB, "3"="-1"))  # Imputer par le mode
 sante_FR$DEG_URB_r <- labelled(sante_FR$DEG_URB_r,c("Densely-populated area"="1","Intermediate-populated area"="2",
-                                                "Thinly-populated area"="3"))
+                                                    "Thinly-populated area"="3"))
 freq(sante_FR$DEG_URB_r)
 chisq.test(table(sante_FR$DEG_URB_r,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$DEG_URB_r,sante_FR$etat_sante),las=3,shade=TRUE)
@@ -122,7 +122,7 @@ freq(sante_FR$HATLEVEL)
 class(sante_FR$HATLEVEL)
 sante_FR$HATLEVEL <- as.character(sante_FR$HATLEVEL)
 sante_FR$HATLEVEL <- fct_collapse(sante_FR$HATLEVEL, "Prim"=c("0","1"), "Secon"=c("2","3","4"),
-                               "Univ"=c("5","6","7","8"))
+                                  "Univ"=c("5","6","7","8"))
 sante_FR$HATLEVEL_r <- as.character(fct_recode(sante_FR$HATLEVEL, "Secon"="-1"))  # Imputer par le mode
 freq(sante_FR$HATLEVEL_r)
 chisq.test(table(sante_FR$HATLEVEL_r,sante_FR$etat_sante))
@@ -199,14 +199,100 @@ sante_FR$AC1C_r <- fct_recode(sante_FR$AC1C,"2"="-1")
 freq(sante_FR$AC1C_r)
 
 # HO1 : Admission en hospitalisation à l'hôpital au cours des 12 derniers mois
+freq(sante_FR$HO1)
+sante_FR$HO1 <- as.character(sante_FR$HO1)
+sante_FR$HO1_r <- fct_collapse(sante_FR$HO1,"N"=c("-1","2"),"O"="1")
+freq(sante_FR$HO1_r)
 
+# HO1 X HO2 : Nombre de nuits passées en tant que patient dans un hôpital au cours des 12 derniers mois
+freq(sante_FR$HO2)
+sante_FR$HO2  <- as.character(sante_FR$HO2)
+sante_FR$HO1_r2 <- as.character(sante_FR$HO1_r)
+freq(sante_FR$HO1_r2)
+class(sante_FR$HO1_r2)
+table(sante_FR$HO2,sante_FR$HO1_r2)
+sante_FR$HO1_r2 <- ifelse(sante_FR$HO1_r2=="O",sante_FR$HO2[sante_FR$HO2!="-2"],sante_FR$HO1_r2[sante_FR$HO1_r2=="N"])
+freq(sante_FR$HO1_r2)
+sante_FR$HO1_r2 <- fct_collapse(sante_FR$HO1_r2,"0"=c("-1","N")) 
+sante_FR$HO1_r2 <- as.integer(as.character(sante_FR$HO1_r2))
+sante_FR$HO1_r3 <- cut(sante_FR$HO1_r2, breaks = c(-1,0,5,210))
+freq(sante_FR$HO1_r3)
+sante_FR$HO1_r3 <- fct_collapse(sante_FR$HO1_r3,"0"="(-1,0]","[1;5]"="(0,5]","[6;210]"="(5,210]")
+chisq.test(table(sante_FR$HO1_r3 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$HO1_r3 ,sante_FR$etat_sante), las=3, shade = T)
 
+# HO3 X HO4 : Nombre de fois admis en tant que patient de jour dans un hôpital au cours des 12 derniers mois
+freq(sante_FR$HO3)
+sante_FR$HO3 <- as.character(sante_FR$HO3)
+sante_FR$HO3_r <- fct_collapse(sante_FR$HO3,"N"=c("-1","2"),"O"="1")
+freq(sante_FR$HO3_r)
+freq(sante_FR$HO4)
+sante_FR$HO4  <- as.character(sante_FR$HO4)
+sante_FR$HO3_r2 <- as.character(sante_FR$HO3_r)
+freq(sante_FR$HO3_r2)
+class(sante_FR$HO3_r2)
+table(sante_FR$HO4,sante_FR$HO3_r2)
+sante_FR$HO3_r2 <- ifelse(sante_FR$HO3_r2=="O",sante_FR$HO4[sante_FR$HO4!="-2"],sante_FR$HO3_r2[sante_FR$HO3_r2=="N"])
+freq(sante_FR$HO3_r2)
+sante_FR$HO3_r2 <- fct_collapse(sante_FR$HO3_r2,"0"=c("-1","N")) 
+sante_FR$HO3_r3 <- fct_collapse(sante_FR$HO3_r2,"2-3"=c("2","3")) 
+freq(sante_FR$HO3_r3)
+chisq.test(table(sante_FR$HO3_r3 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$HO3_r3 ,sante_FR$etat_sante), las=3, shade = T)
 
-# HO2 : Nombre de nuits passées en tant que patient dans un hôpital au cours des 12 derniers mois
+# AM1 : Dernière visite chez le dentiste ou l'orthodentiste 
+freq(sante_FR$AM1)
+sante_FR$AM1 <- as.character(sante_FR$AM1)
+sante_FR$AM1 <- fct_recode(sante_FR$AM1, "3"="-1")
+chisq.test(table(sante_FR$AM1 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$AM1 ,sante_FR$etat_sante), las=3, shade = T)
 
+# AM2 : Dernière consultation chez un médecin généraliste ou médecin de famille 
+freq(sante_FR$AM2)
+sante_FR$AM2 <- as.character(sante_FR$AM2)
+sante_FR$AM2 <- fct_recode(sante_FR$AM2, "1"="-1")
+chisq.test(table(sante_FR$AM2 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$AM2 ,sante_FR$etat_sante), las=3, shade = T)
 
+# AM4 : Dernière consultation chez un médecin ou chirurgien spécialiste 
+freq(sante_FR$AM4)
+sante_FR$AM4 <- as.character(sante_FR$AM4)
+sante_FR$AM4 <- fct_recode(sante_FR$AM4, "1"="-1")
+chisq.test(table(sante_FR$AM4 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$AM4 ,sante_FR$etat_sante), las=3, shade = T)
 
-# HO3 : L'admission en tant que patient de jour dans un hôpital au cours des 12 derniers mois
+# AM6a : Consultation d'un physiothérapeute ou d'un kinésithérapeute au cours des 12 derniers mois
+freq(sante_FR$AM6A)
+sante_FR$AM6A <- as.character(sante_FR$AM6A)
+sante_FR$AM6A <- fct_recode(sante_FR$AM6A, "1"="-1")
+chisq.test(table(sante_FR$AM6A ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$AM6A ,sante_FR$etat_sante), las=3, shade = T)
 
+# AM6b : Consultation d'un psychologue ou d'un psychothérapeute au cours des 12 derniers mois
+freq(sante_FR$AM6B)
+sante_FR$AM6B <- as.character(sante_FR$AM6B)
+sante_FR$AM6B <- fct_recode(sante_FR$AM6B, "2"="-1")
+chisq.test(table(sante_FR$AM6B ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$AM6B ,sante_FR$etat_sante), las=3, shade = T)
 
-# HO4 : Nombre de fois admis en tant que patient de jour dans un hôpital au cours des 12 derniers mois
+# AM7 : Utilisation de services de soins à domicile pour des besoins personnels au cours des 12 derniers mois
+freq(sante_FR$AM7)
+sante_FR$AM7 <- as.character(sante_FR$AM7)
+sante_FR$AM7 <- fct_recode(sante_FR$AM7, "2"="-1")
+chisq.test(table(sante_FR$AM7 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$AM7 ,sante_FR$etat_sante), las=3, shade = T)
+
+# MD1 : Utilisation de médicament prescrit par un médecin durant les deux dernieres semaines 
+freq(sante_FR$MD1)
+sante_FR$MD1 <- as.character(sante_FR$MD1)
+sante_FR$MD1 <- fct_recode(sante_FR$MD1, "1"="-1")
+chisq.test(table(sante_FR$MD1 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$MD1 ,sante_FR$etat_sante), las=3, shade = T)
+
+# MD2 : Utilisation de médicaments, médicaments à base de plantes ou vitamines non prescrits par un médecin au cours des deux dernières semaines
+freq(sante_FR$MD2)
+sante_FR$MD2 <- as.character(sante_FR$MD2)
+sante_FR$MD2 <- fct_recode(sante_FR$MD2, "2"="-1")
+chisq.test(table(sante_FR$MD2 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$MD2 ,sante_FR$etat_sante), las=3, shade = T)
+
