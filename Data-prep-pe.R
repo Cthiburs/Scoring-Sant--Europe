@@ -296,3 +296,127 @@ sante_FR$MD2 <- fct_recode(sante_FR$MD2, "2"="-1")
 chisq.test(table(sante_FR$MD2 ,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$MD2 ,sante_FR$etat_sante), las=3, shade = T)
 
+# PA1 : Dernière vaccination contre la grippe Variable à comprendre sinon supprimer
+freq(sante_FR$pa1)  # Pas bien renseigner les dates
+
+
+# PA2 : Dernière mesure de la tension artérielle par un professionnel de la santé
+freq(sante_FR$PA2)
+sante_FR$PA2 <- as.character(sante_FR$PA2)
+sante_FR$PA2 <- fct_recode(sante_FR$PA2, "1"="-1")
+chisq.test(table(sante_FR$PA2 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PA2 ,sante_FR$etat_sante), las=3, shade = T)
+
+
+# PA3 : Dernière mesure du taux de cholestérol sanguin par un professionnel de la santé
+freq(sante_FR$PA3)
+sante_FR$PA3 <- as.character(sante_FR$PA3)
+sante_FR$PA3 <- fct_recode(sante_FR$PA3, "1"="-1")
+chisq.test(table(sante_FR$PA3 ,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PA3 ,sante_FR$etat_sante), las=3, shade = T)
+
+
+# PA4 : Dernière mesure de la glycémie par un professionnel de la santé
+freq(sante_FR$PA4)
+sante_FR$PA4 <- as.character(sante_FR$PA4)
+sante_FR$PA4 <- fct_recode(sante_FR$PA4, "1"="-1")
+chisq.test(table(sante_FR$PA4,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PA4,sante_FR$etat_sante), las=3, shade = T)
+
+# PA5 : La dernière fois d'une analyse de sang occulte dans les selles
+freq(sante_FR$PA5)
+sante_FR$PA5 <- as.character(sante_FR$PA5)
+sante_FR$PA5 <- fct_recode(sante_FR$PA5, "5"="-1")
+chisq.test(table(sante_FR$PA5,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PA5,sante_FR$etat_sante), las=3, shade = T)
+
+# PA6 : Dernière coloscopie
+freq(sante_FR$PA6)
+sante_FR$PA6 <- as.character(sante_FR$PA6)
+sante_FR$PA6 <- fct_recode(sante_FR$PA6, "5"="-1")
+chisq.test(table(sante_FR$PA5,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PA5,sante_FR$etat_sante), las=3, shade = T)
+
+# UN1A : Besoins non satisfaits en matière de soins de santé au cours des 12 derniers mois en raison des longues listes d'attente
+freq(sante_FR$UN1A)  # Supprimer cette variable cause DM 49%
+freq(sante_FR$UN1B)   # Supprimer cette variable cause DM 49%
+freq(sante_FR$UN2A)   # Supprimer cette variable cause DM 49%
+freq(sante_FR$UN2B)   # Supprimer cette variable cause DM 49%
+freq(sante_FR$UN2C)   # Supprimer cette variable cause DM 49%
+
+
+# PE1 : Effort physique au travail (rémunérées et non rémunérées activités de travail incluses)
+freq(sante_FR$PE1)
+sante_FR$PE1 <- as.character(sante_FR$PE1)
+sante_FR$PE1 <- fct_recode(sante_FR$PE1, "2"="-1")
+chisq.test(table(sante_FR$PE1,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PE1,sante_FR$etat_sante), las=3, shade = T)
+
+# PE2 : Nombre de jours par semaine à réaliser des trajets à pied d'au moins 10 min sans interruption
+freq(sante_FR$PE2)
+sante_FR$PE2 <- as.character(sante_FR$PE2)
+sante_FR$PE2 <- fct_recode(sante_FR$PE2, "0"="-1")
+chisq.test(table(sante_FR$PE2,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PE2,sante_FR$etat_sante), las=3, shade = T)
+
+# PE4 : Nombre de jours par semaine à réaliser des trajets en vélo d'au moins 10 min sans interruption
+freq(sante_FR$PE4)
+sante_FR$PE4 <- as.character(sante_FR$PE4)
+sante_FR$PE4 <- fct_recode(sante_FR$PE4, "0"="-1")
+chisq.test(table(sante_FR$PE4,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PE4,sante_FR$etat_sante), las=3, shade = T)
+
+# PE6 : Nombre de jour par semaine à pratiquer une activité physique d'au moins 10min sans interruption
+freq(sante_FR$PE6)
+sante_FR$PE6 <- as.character(sante_FR$PE6)
+sante_FR$PE6 <- fct_recode(sante_FR$PE6, "0"="-1")
+chisq.test(table(sante_FR$PE6,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PE6,sante_FR$etat_sante), las=3, shade = T)
+
+# PE 8 : Nombre de jour par semaine à faire du renforcement musculaire
+freq(sante_FR$PE8)
+sante_FR$PE8 <- as.character(sante_FR$PE8)
+sante_FR$PE8 <- fct_recode(sante_FR$PE8, "0"="-1")
+chisq.test(table(sante_FR$PE8,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$PE8,sante_FR$etat_sante), las=3, shade = T)
+
+# FV1 : A quelle fréquence consommez- vous des fruits par semaine (jus de fruit inclus)
+freq(sante_FR$FV1)
+sante_FR$FV1 <- as.character(sante_FR$FV1)
+sante_FR$FV1 <- fct_recode(sante_FR$FV1, "0"="-1")
+chisq.test(table(sante_FR$FV1,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$FV1,sante_FR$etat_sante), las=3, shade = T)
+
+# FV3 : A quelle fréquence consommez- vous des légumes ou de la salade par semaine (exclusion des jus et des pomme de terre)
+freq(sante_FR$FV3)
+sante_FR$FV3 <- as.character(sante_FR$FV3)
+sante_FR$FV3 <- fct_recode(sante_FR$FV3, "0"="-1")
+chisq.test(table(sante_FR$FV3,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$FV3,sante_FR$etat_sante), las=3, shade = T)
+
+# SK1 : Type de consommateur de tabac
+freq(sante_FR$SK1)
+sante_FR$SK1 <- as.character(sante_FR$SK1)
+sante_FR$SK1 <- fct_recode(sante_FR$SK1, "3"="-1")
+chisq.test(table(sante_FR$SK1,sante_FR$etat_sante))
+mosaicplot(table(sante_FR$SK1,sante_FR$etat_sante), las=3, shade = T)
+
+# IC1 : Fournissez-vous de l'aide à des personnes agées, malades,… au moins une fois par semaine ?
+freq(sante_FR$IC1) # Variable à supprimer
+
+# nb_maladie
+freq(sante_FR$nb_maladiegrave)
+sante_FR$nb_maladiegrave <- as.character(sante_FR$nb_maladiegrave)
+sante_FR$nb_maladiegrave <- fct_collapse(sante_FR$nb_maladiegrave, "3+"=c("3","4","5","6","7","8"))
+freq(sante_FR$nb_maladiegrave)
+
+freq(sante_FR$nb_maladiepasgrave)
+sante_FR$nb_maladiepasgrave <- as.character(sante_FR$nb_maladiepasgrave)
+sante_FR$nb_maladiepasgrave <- fct_collapse(sante_FR$nb_maladiepasgrave, "4+"=c("4","5","6","7"))
+freq(sante_FR$nb_maladiepasgrave)
+
+###### Base Finale
+sante_FR2 <- sante_FR %>% select(-c("REFYEAR","HO2","IC1","UN1B","UN2A","UN2B","UN2C","UN2D","HO4","pa1","PA7","PA8","UN1A","JOBISCO","JOBSTAT","COUNTRY","age","DEG_URB","MARSTALEGAL","HATLEVEL","MAINSTAT","MAINSTAT2","HHNBPERS_65PLUS","AC1A","AC1B","AC1C","HO1","HO1_r","HO1_r2","HO3","HO3_r","HO3_r2"))
+
+dim(sante_FR2)
+glimpse(sante_FR2)
