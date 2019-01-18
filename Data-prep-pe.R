@@ -16,8 +16,9 @@ sante <- drive_download("BDD_SANTE.csv",overwrite = T)  # Pour télécharger la 
 read_lines("BDD_SANTE.csv",n_max=2)
 sante_eu <- read_csv2("BDD_SANTE.csv")
 
+# Vérifier la virgule de l'imc, du poids
 
-### DATA WRANGLING
+### DATA WRANGLING (On regarde le tableau de fréquence des données)
 
 sante_eu %>% group_by(COUNTRY) %>% count(REFYEAR) %>% mutate(prop = round(n/sum(n),2)) %>% 
   select(-n) %>% spread(key="REFYEAR",value=prop)   # Supprimer les pays AT, HR, DE, cause ENQUÊTE EFFECTUÉE en 2013 ou 2015. Supprimer ou considérer pour la FR, CZ et SE les individus de 2015.
@@ -50,7 +51,7 @@ sante_eu %>% group_by(COUNTRY) %>% count(AC1A) %>% mutate(prop = round(n/sum(n),
   select(-n) %>% spread(key="AC1A",value=prop) # Supprimé SE car 15 % DM
 
 sante_eu %>% group_by(COUNTRY) %>% count(AC2) %>% mutate(prop = round(n/sum(n),2)) %>% 
-  select(-n) %>% spread(key="AC2",value=prop)  # Supprimé car très lié à AC1 et moins de 10% en général
+  select(-n) %>% spread(key="AC2",value=prop)  # Supprimé car très lié à AC1A et moins de 10% en général
 
 sante_eu %>% group_by(COUNTRY) %>% count(HO2) %>% mutate(prop = round(n/sum(n),2)) %>% 
   select(-n) %>% spread(key="HO2",value=prop)  # Fusionné H01 et H02 puis H03 et H04
@@ -81,7 +82,7 @@ head(sante_FR)
 # DATA PREP SUR LA BASE SANTE_FR
 glimpse(sante_FR)
 freq(sante_FR$REFYEAR)
-sante_FR <- sante_FR %>% filter(REFYEAR==2014)
+ sante_FR <- sante_FR %>% filter(REFYEAR==2014)
 
 # Age
 freq(sante_FR$age)   
@@ -155,7 +156,9 @@ mosaicplot(table(sante_FR$HHNBPERS,sante_FR$etat_sante), las=3, shade = T)
 freq(sante_FR$HHNBPERS_65PLUS)
 sante_FR$HHNBPERS_65PLUS <- as.character(sante_FR$HHNBPERS_65PLUS)
 class(sante_FR$HHNBPERS_65PLUS)
-sante_FR$HHNBPERS_65PLUS_r <- fct_collapse(sante_FR$HHNBPERS_65PLUS, "Oui"=c("-1","0"), "Non"=c("1","2","3"))
+table(sante_FR$HHNBPERS_65PLUS,sante_FR$age)
+sante_FR$HHNBPERS_65PLUS_r <- ifelse(sante_FR$age %in% c("65-69","70-74","75-79","80-84","85+") & sante_FR$HHNBPERS_65PLUS=="-1","1",sante_FR$HHNBPERS_65PLUS)
+sante_FR$HHNBPERS_65PLUS_r <- fct_collapse(sante_FR$HHNBPERS_65PLUS_r, "Non"=c("-1","0"), "Oui"=c("1","2","3"))
 freq(sante_FR$HHNBPERS_65PLUS_r)
 chisq.test(table(sante_FR$HHNBPERS_65PLUS_r,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$HHNBPERS_65PLUS_r,sante_FR$etat_sante), las=3, shade = T)
@@ -171,7 +174,7 @@ mosaicplot(table(sante_FR$hhtype,sante_FR$etat_sante), las=3, shade = T)
 freq(sante_FR$HH_ACT)
 class(sante_FR$HH_ACT)
 sante_FR$HH_ACT <- as.character(sante_FR$HH_ACT)
-sante_FR$HH_ACT <- fct_recode(sante_FR$HH_ACT,"0"="-1")
+sante_FR$HH_ACT <- fct_collapse(sante_FR$HH_ACT,"0"="-1","3+"=c("3","4","5"))
 chisq.test(table(sante_FR$HH_ACT,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$HH_ACT,sante_FR$etat_sante), las=3, shade = T)
 
@@ -401,6 +404,15 @@ sante_FR$SK1 <- fct_recode(sante_FR$SK1, "3"="-1")
 chisq.test(table(sante_FR$SK1,sante_FR$etat_sante))
 mosaicplot(table(sante_FR$SK1,sante_FR$etat_sante), las=3, shade = T)
 
+# SK4 : Fréquence d'exposition à la fumé de tabac 
+table(sante_FR$SK1,sante_FR$SK4)
+freq(sante_FR$SK4)
+sante_FR$SK4 <- as.character(sante_FR$SK4)
+sante_FR$SK4_r <- if_else(sante_FR$SK4=="-1" & sante_FR$SK1=="1","3",
+                          if_else(sante_FR$SK4=="-1" & sante_FR$SK1=="2","2",
+                                 if_else(sante_FR$SK4=="-1" & sante_FR$SK1=="3","1",sante_FR$SK4)))
+table(sante_FR$SK1,sante_FR$SK4_r)
+
 # IC1 : Fournissez-vous de l'aide à des personnes agées, malades,… au moins une fois par semaine ?
 freq(sante_FR$IC1) # Variable à supprimer
 
@@ -415,8 +427,98 @@ sante_FR$nb_maladiepasgrave <- as.character(sante_FR$nb_maladiepasgrave)
 sante_FR$nb_maladiepasgrave <- fct_collapse(sante_FR$nb_maladiepasgrave, "4+"=c("4","5","6","7"))
 freq(sante_FR$nb_maladiepasgrave)
 
-###### Base Finale
+###### Base Finale V1
 sante_FR2 <- sante_FR %>% select(-c("REFYEAR","HO2","IC1","UN1B","UN2A","UN2B","UN2C","UN2D","HO4","pa1","PA7","PA8","UN1A","JOBISCO","JOBSTAT","COUNTRY","age","DEG_URB","MARSTALEGAL","HATLEVEL","MAINSTAT","MAINSTAT2","HHNBPERS_65PLUS","AC1A","AC1B","AC1C","HO1","HO1_r","HO1_r2","HO3","HO3_r","HO3_r2"))
 
 dim(sante_FR2)
 glimpse(sante_FR2)
+
+### CORRELATION QUALI : V DE CRAMER
+var <- as.matrix(colnames(sante_FR2))
+var <- var[-match(c("PID","WGT","nb_maladiepasgrave","nb_maladiegrave"),table=var[,1]),]
+var
+class(var)
+cram_V <- matrix(0,length(var),length(var),dimnames = list(var,var))
+cram_V
+#cram_V[-match("SEX",table=var),]
+cram_V2 <- cram_V
+
+for (i in var) {
+  for (j in var) {
+    y <- sante_FR2 %>% select(c(i,j))
+    cram_V[i,j] <- ifelse(i==j,assign(paste0("cram_",i,j), 1), assign(paste0("cram_",i,j), cramer.v(table(y[[1]],y[[2]]))))
+  cram_V2[i,j] <- ifelse(cram_V[i,j]>=0.3,cram_V[i,j],0)
+    }
+}
+
+cram_V3 <- cram_V2
+for (i in var) {
+  if(sum(cram_V2[,i])==1) {
+  cram_V3 <- cram_V3[-match(i,table=var),]
+  cram_V3 <- cram_V3[,-match(i,table=var)]
+  }
+}
+
+
+# Créer une interaction entre age_r et HHNBPERS_65_plus
+table(sante_FR2$age_r,sante_FR2$HHNBPERS_65PLUS_r)
+sante_FR2$AGE_PERS65 <- if_else(sante_FR2$age_r=="15-39" & sante_FR2$HHNBPERS_65PLUS_r=="Non","15-39_Non",
+                                if_else(sante_FR2$age_r=="15-39" & sante_FR2$HHNBPERS_65PLUS_r=="Oui","15-39_Oui",
+                                        if_else(sante_FR2$age_r=="40-64" & sante_FR2$HHNBPERS_65PLUS_r=="Non","40-64_Non",
+                                                if_else(sante_FR2$age_r=="40-64" & sante_FR2$HHNBPERS_65PLUS_r=="Oui","40-64_Oui", "65+_Oui"))))
+freq(sante_FR2$AGE_PERS65)
+
+# Supprimer AM7 et HO1_r3 et créer une intercation (demander explication lydie,depret,diana)
+table(sante_FR2$AM7,sante_FR2$HO1_r3)
+sante_FR2$AM7_HO12 <- if_else(sante_FR2$AM7=="2" & sante_FR2$HO1_r3=="0","0_Non",
+                              if_else(sante_FR2$AM7=="2" & sante_FR2$HO1_r3=="[1;5]","[1;5]_Non",
+                                      if_else(sante_FR2$AM7=="2" & sante_FR2$HO1_r3=="[6;210]","[6;210]_Non",
+                                              if_else(sante_FR2$AM7=="1" & sante_FR2$HO1_r3=="0","0_Oui",
+                                                      if_else(sante_FR2$AM7=="1" & sante_FR2$HO1_r3=="[1;5]","[1;5]_Oui","[6;210]_Oui")))))
+freq(sante_FR2$AM7_HO12)
+chisq.test(table(sante_FR2$AM7_HO12,sante_FR2$etat_sante))
+mosaicplot(table(sante_FR2$AM7_HO12,sante_FR2$etat_sante),las = 3, shade = T)
+
+# Créer interaction PA3 X PA4 et recoder PA2
+table(sante_FR2$PA3,sante_FR2$PA4)
+sante_FR2$PA3_r <- fct_collapse(sante_FR2$PA3, "<=1A"="1",">1A"=c("2","3","4"),"Jamais"="5")
+freq(sante_FR2$PA3_r)
+sante_FR2$PA4_r <- fct_collapse(sante_FR2$PA4, "<=1A"="1",">1A"=c("2","3","4"),"Jamais"="5")
+freq(sante_FR2$PA4_r)
+sante_FR2$PA2_r <- fct_collapse(sante_FR2$PA2, "<=1A"="1",">1A"=c("2","3","4"),"Jamais"="5")
+freq(sante_FR2$PA2_r)
+table(sante_FR2$PA3_r,sante_FR2$PA4_r)
+cramer.v(table(sante_FR2$PA3_r,sante_FR2$PA4_r))
+
+sante_FR2$PA34 <- if_else(sante_FR2$PA3_r=="<=1A" & sante_FR2$PA4_r=="<=1A","<=1A",
+                          if_else(sante_FR2$PA3_r==">1A" & sante_FR2$PA4_r==">1A",">1A",
+                                  if_else(sante_FR2$PA3_r=="Jamais" & sante_FR2$PA4_r=="Jamais","Jamais","Autres")))
+freq(sante_FR2$PA34)
+cramer.v(table(sante_FR2$PA34,sante_FR2$etat_sante))                              
+                              
+# créer une interaction SK1 X SK4, regrouper SK1 en fumeur actif Oui/Non et SK4 en fumeur passif Oui/Non
+prop(table(sante_FR2$SK1,sante_FR2$SK4_r))
+freq(sante_FR2$SK1)
+freq(sante_FR2$SK4_r)
+sante_FR2$FUMACT <- fct_collapse(sante_FR2$SK1, "Oui"=c("1","2"),"Non"="3")
+sante_FR2$FUMPAS <- fct_collapse(sante_FR2$SK4_r, "Oui"=c("3","2"),"Non"="1")
+freq(sante_FR2$FUMACT)
+freq(sante_FR2$FUMPAS)
+prop(table(sante_FR2$FUMACT,sante_FR2$FUMPAS))
+
+sante_FR2$FUMACTPAS <- if_else(sante_FR2$FUMACT=="Oui" & sante_FR2$FUMPAS=="Oui","Fumeur Actif et Passif",
+                               if_else(sante_FR2$FUMACT=="Non" & sante_FR2$FUMPAS=="Non","Non Fumeur",
+                                       if_else(sante_FR2$FUMACT=="Oui" & sante_FR2$FUMPAS=="Non","Fumeur Actif","Fumeur Passif")))
+freq(sante_FR2$FUMACTPAS)
+cramer.v(table(sante_FR2$FUMACTPAS,sante_FR2$etat_sante)) 
+
+
+
+# Supprimer HHNBPERS, hhtype et garder HHNBPERS_65_plus car les trois sont liés (0.46) et hhnbpers65 est plus lié à l'état santé que les autres (0.3 VS 0.17 VS 0.18)
+# Supprimer HH_ACT car lié à l'âge et à l'IMC(0.4), Supprimer AM2 car lié à MD1 et PA2. Supprimer PA2, PA3 et PA4 car lié à MD1-age_r et très lié entre elles. Supprimer PE8 et garder PE6 car elle est plus liée à etat santé (0.16 VS 0.10). Supprimer FV3 et garder FV1 car plus liée à etat de santé (0.06 VS 0.04)
+##### BASE FINALE V03
+glimpse(sante_FR2)
+sante_FR3 <- sante_FR2 %>% select(-c("PID","HHNBPERS","AM2","AM7","PA4","PA3","PA2","PE8","FV3","SK1","SK4","age_r","MARSTALEGAL_r","HHNBPERS_65PLUS_r","HO1_r3","SK4_r","PA4_r","PA3_r","FUMPAS","FUMACT"))
+glimpse(sante_FR3)
+dim(sante_FR3)
+
