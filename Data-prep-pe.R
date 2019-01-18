@@ -8,13 +8,16 @@ library(googledrive) #-- chargement de l'API de google Drive
 library(RCurl)
 library(questionr)
 library(labelled)
+library(bnstruct)
+library(VIM)
 
 
 ### DATA IMPORT VIA GOOGLE DRIVE
 drive_find(n_max = 5,type="csv")
 sante <- drive_download("BDD_SANTE.csv",overwrite = T)  # Pour télécharger la base
 read_lines("BDD_SANTE.csv",n_max=2)
-sante_eu <- read_csv2("BDD_SANTE.csv")
+sante_eu <- read_delim("BDD_SANTE.csv",delim = ";")
+glimpse(sante_eu)
 
 # Vérifier la virgule de l'imc, du poids
 
@@ -521,4 +524,23 @@ glimpse(sante_FR2)
 sante_FR3 <- sante_FR2 %>% select(-c("PID","HHNBPERS","AM2","AM7","PA4","PA3","PA2","PE8","FV3","SK1","SK4","age_r","MARSTALEGAL_r","HHNBPERS_65PLUS_r","HO1_r3","SK4_r","PA4_r","PA3_r","FUMPAS","FUMACT"))
 glimpse(sante_FR3)
 dim(sante_FR3)
+freq(sante_FR3$HHINCOME)
+class(sante_FR3$HHINCOME)
+sante_FR3$HHINCOME <- as.factor(sante_FR3$HHINCOME)
+sante_FR3$SEX <- as.factor(sante_FR3$SEX)
+sante_FR3$hhtype <- as.factor(sante_FR3$hhtype)
+sante_FR3$HHINCOME<- fct_recode(sante_FR3$HHINCOME,NULL="-1")
+freq(sante_FR3$HHINCOME)
+sante_FR33 <- sante_FR3[,-c(1,19)]
+nam <- names(sante_FR3)
+nam <- nam[-c(1,5,19)]
+nam
+#sante_FR4 <-  knn.impute(sante_FR3,k=10, cat.var = nam,to.impute = "HHINCOME",using = nam )
+#freq(sante_FR3$HHINCOME)
+sante_FR4 <- kNN(sante_FR3, variable="HHINCOME", k=10, dist_var = nam,catFun=maxCat)
+freq(sante_FR4$HHINCOME)
+freq(sante_FR4$HHINCOME_imp)
+table(sante_FR4$HHINCOME,sante_FR4$HHINCOME_imp)
 
+### DERNIERE VERSION ISSUE DE LA DATA PREP
+sante_FR5 <- sante_FR4[,-35]
