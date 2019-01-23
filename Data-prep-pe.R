@@ -544,3 +544,7 @@ table(sante_FR4$HHINCOME,sante_FR4$HHINCOME_imp)
 
 ### DERNIERE VERSION ISSUE DE LA DATA PREP
 sante_FR5 <- sante_FR4[,-35]
+dim(sante_FR5)
+glimpse(sante_FR5)
+
+write_delim(sante_FR5,path="SANTE_FR",delim=";")
